@@ -5,7 +5,6 @@
 
 ### 5. Interrogation du DNS avec Python :
 
-
 ##### Les prérequis:
 ```
 docker network create 3-node_net-0 
@@ -56,7 +55,7 @@ for MX in dns.resolver.query('iutbeziers.fr', 'MX'):
     scribe.iutbeziers.fr.
     10 mail.iutbeziers.fr.
 
-##### 4. Retrouvez le resolver de votre container.
+##### 4. Retrouvez le resolver de votre container :
 ```python
 mon_resolver = dns.resolver.Resolver()
 print (mon_resolver.nameservers)
@@ -65,7 +64,6 @@ print (mon_resolver.nameservers)
     ['127.0.0.11']
 
 ### 6. Gestion de l’adressage réseaux :
-
 
 ##### 1. Créer deux instances de IPNetwork avec les adresses réseaux des salles 202 et 203 :
 ```python
@@ -103,16 +101,17 @@ print("Nombre d'adresses IP disponible :",IP_Salle_203.size)
     Nombre d'adresses IP disponible : 65536
 
 
-###### 2. Listez et comptez les adresses ip disponibles dans une salle en fonction du nombre de postes dans la salle (on prendra 20 postes par salle) :
-
+##### 2. Listez et comptez les adresses ip disponibles dans une salle en fonction du nombre de postes dans la salle (on prendra 20 postes par salle) :
+On crée une liste qui contient les adresses de la salle 202 :
 ```python
-# Salle 202
 liste_IP202 = []
 for IP_202 in IPNetwork('10.202.0.0/16'):
     IP_202 = '%s' % IP_202
     liste_IP202.append(IP_202)
 print("Nombre d'adresses IP disponible :",len(liste_IP202))
-# Salle 203
+```
+On crée une liste qui contient les adresses de la salle 203 :
+```python
 liste_IP203 = []
 for IP_203 in IPNetwork('10.203.0.0/16'):
     IP_203 = '%s' % IP_203
@@ -120,34 +119,47 @@ for IP_203 in IPNetwork('10.203.0.0/16'):
 print("Nombre d'adresses IP disponible :",len(liste_IP203))
 
 print('\n')
-
-# Liste de 20 postes dans la salle 202
+```
+Liste de 20 postes dans la salle 202 sur les 65536 disponibles :
+```python
 salle_202 = [str(IP_202) for IP_202 in liste_IP202 for a in range(1,21) if IP_202 == ("10.202." + str(a) + ".1")]
 print("Liste d'adresses IP disponibles dans la salle 202 :",salle_202)
 
-print('\n')
-
-# Liste de 20 postes dans la salle 203
+   Nombre d'adresses IP disponibles : 65536
+```
+Liste de 20 postes dans la salle 203 sur les 65536 disponibles :
+```python
 salle_203 = [str(IP_203) for IP_203 in liste_IP203 for a in range(1,21) if IP_203 == ("10.203." + str(a) + ".1")]
 print("Liste d'adresses IP disponibles dans la salle 203 :",salle_203)
-```
 
-    Nombre d'adresses IP disponible : 65536
-    Nombre d'adresses IP disponible : 65536
+    Nombre d'adresses IP disponibles : 65536
+```   
     
+    Liste des 20 adresses IP disponibles dans la salle 
+```  python    
+    202 : ['10.202.1.1', '10.202.2.1', '10.202.3.1', '10.202.4.1', '10.202.5.1', '10.202.6.1', '10.202.7.1', '10.202.8.1', '10.202.9.1', '10.202.10.1', '10.202.11.1', '10.202.12.1', '10.202.13.1', '10.202.14.1', '10.202.15.1', '10.202.16.1', '10.202.17.1', '10.202.18.1', '10.202.19.1', '10.202.20.1']
+```       
     
-    Liste d'adresses IP disponibles dans la salle 202 : ['10.202.1.1', '10.202.2.1', '10.202.3.1', '10.202.4.1', '10.202.5.1', '10.202.6.1', '10.202.7.1', '10.202.8.1', '10.202.9.1', '10.202.10.1', '10.202.11.1', '10.202.12.1', '10.202.13.1', '10.202.14.1', '10.202.15.1', '10.202.16.1', '10.202.17.1', '10.202.18.1', '10.202.19.1', '10.202.20.1']
-    
-    
-    Liste d'adresses IP disponibles dans la salle 203 : ['10.203.1.1', '10.203.2.1', '10.203.3.1', '10.203.4.1', '10.203.5.1', '10.203.6.1', '10.203.7.1', '10.203.8.1', '10.203.9.1', '10.203.10.1', '10.203.11.1', '10.203.12.1', '10.203.13.1', '10.203.14.1', '10.203.15.1', '10.203.16.1', '10.203.17.1', '10.203.18.1', '10.203.19.1', '10.203.20.1']
-
+    Liste des 20 adresses IP disponibles dans la salle
+```  python    
+    203 : ['10.203.1.1', '10.203.2.1', '10.203.3.1', '10.203.4.1', '10.203.5.1', '10.203.6.1', '10.203.7.1', '10.203.8.1', '10.203.9.1', '10.203.10.1', '10.203.11.1', '10.203.12.1', '10.203.13.1', '10.203.14.1', '10.203.15.1', '10.203.16.1', '10.203.17.1', '10.203.18.1', '10.203.19.1', '10.203.20.1']
+```   
 
 ##### 3. Créez un nouvel objet Network en mergeant les réseaux des deux salles :
+On créer une liste "ipmerge", à laquelle nous allons ajouter les 2 réseaux (202 et 203):
 ```python
-
-
+In [63]: ipmerge = []                               
+In [65]: ipmerge.append(ip202)                         
+In [66]: ipmerge.append(ip203)                         
+In [67]: ipmerge                                       
+Out[67]: [IPNetwork('10.202.0.0/16'), IPNetwork('10.203.0.0/16')]
 ```
-
+Puis on merge ces réseaux :
+```python
+In [71]: mergednetwork = cidr_merge(ipmerge)           
+In [72]: mergednetwork                                 
+Out[72]: [IPNetwork('10.202.0.0/15')]
+```
 ##### 4. Listez les subnets /25 de ce nouveau réseau :
 ```python
 
