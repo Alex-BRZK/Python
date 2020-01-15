@@ -452,7 +452,7 @@ for liste in sortie.splitlines():
 ```
 On teste maintenant le script python pour savoir si le package paramiko fonctionne afin d'afficher "show ip interfaces brief" :
 ```bash
-student@d59593327458:~/python$ python3 paramikoPY.py 
+student@d59593327458:~/python$ python3 paramiko1.py 
 Rentrez l'adresse IP: 172.18.0.3
 Rentrez votre nom d'utilisateur: admin
 Password: 
@@ -510,7 +510,7 @@ for x in range(int(nbrouteurs)):
 On test notre script sur les différents routeurs :
 
 ```bash
-student@d59593327458:~/python$ python3 paramikoPY_plusieurs.py 
+student@d59593327458:~/python$ python3 paramiko2.py 
 Rentre le nombre de routeurs: 2
 Rentrez l'adresse IP: 172.18.0.3
 Rentrez votre nom d'utilisateur: admin
@@ -565,7 +565,7 @@ print(sortie)
 Voici le résultat donné par l'éxecution de notre script :
 
 ```bash
-student@d59593327458:~/python$ python3 netmikoPY.py 
+student@d59593327458:~/python$ python3 netmiko1.py 
 Interface                  IP-Address      OK? Method Status                Protocol
 FastEthernet0/0            172.18.0.3      YES manual up                    up      
 Serial0/0                  unassigned      YES unset  administratively down down    
@@ -580,7 +580,120 @@ Serial1/3                  unassigned      YES unset  administratively down down
 ```
 
 ##### 2. Utilisation du package Netmiko pour configurer un autre réseau sur une interface de loopback pour le routeur Cisco.
+Je paramètre le routeur pour configurer un autre réseau sur une interface de loopback, depuis un script pyhton:
+```python
+from netmiko import ConnectHandler
+connexion_netmiko = ConnectHandler(device_type='cisco_ios', host='172.18.0.3', username='admin', password='cisco', secret='cisco')
+connexion_netmiko.find_prompt()
+connexion_netmiko.enable()
+config_commands = ['interface loopback 0', 'ip address 192.168.1.1 255.255.255.0']
+sortie = connexion_netmiko.send_config_set(config_commands)
+print(sortie)
+sortie = connexion_netmiko.send_command("show run | begin interface Loopback0")
+print(sortie)
+```
 
+Puis je lance le script python pour vérifier le fonctionnement :
+```python
+student@d59593327458:~/python$ python3 netmiko2.py 
+config term
+Enter configuration commands, one per line.  End with CNTL/Z.
+R1(config)#interface loopback 0
+R1(config-if)#ip address 192.168.1.1 255.255.255.0
+R1(config-if)#end
+R1#
+interface Loopback0
+ ip address 192.168.1.1 255.255.255.0
+!
+interface FastEthernet0/0
+ ip address 172.18.0.3 255.255.0.0
+ duplex auto
+ speed auto
+!
+interface Serial0/0
+ no ip address
+ shutdown
+ clock rate 2000000
+!
+interface FastEthernet0/1
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+!
+interface Serial0/1
+ no ip address
+ shutdown
+ clock rate 2000000
+!
+interface Serial0/2
+ no ip address
+ shutdown
+ clock rate 2000000
+!
+interface Serial0/3
+ no ip address
+ shutdown
+ clock rate 2000000
+!
+interface Serial1/0
+ no ip address
+ shutdown
+ serial restart-delay 0
+!
+interface Serial1/1
+ no ip address
+ shutdown
+ serial restart-delay 0
+!
+interface Serial1/2
+ no ip address
+ shutdown
+ serial restart-delay 0
+!
+interface Serial1/3
+ no ip address
+ shutdown
+ serial restart-delay 0
+!
+ip forward-protocol nd
+!
+!
+no ip http server
+no ip http secure-server
+!
+no cdp log mismatch duplex
+!
+!
+!
+!
+!
+!
+control-plane
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+line con 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+line aux 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+line vty 0 4
+ password 7 030752180500
+!
+!
+end
+```
 
 
 
