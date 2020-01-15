@@ -420,7 +420,169 @@ Password:
 R1>
 ```
 
-### 7.3 Utilisation du package paramiko pour passer une commande sur un node système ou réseau
+#### 7.3 Utilisation du package paramiko pour passer une commande sur un node système ou réseau
+##### 1. Utilisez le package paramiko pour afficher le résutat de la commande "show ip interfaces brief" sur votre routeur Cisco.
+```python
+import paramiko
+import time
+import datetime
+import re
+from getpass import getpass
+
+ip = input("Rentrez l'adresse IP: ")
+username = input("Rentrez votre nom d'utilisateur: ")
+password = getpass()
+
+term_routeur=paramiko.SSHClient()
+term_routeur.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+term_routeur.connect(ip, port=22, username=username,
+                        password=password,
+                        look_for_keys=False, allow_agent=False)
+
+routeur = term_routeur.invoke_shell()
+sortie = routeur.recv(65535)
+for liste in sortie.splitlines():
+        print (liste)
+
+routeur.send("show ip int brief\n")
+time.sleep(.5)
+sortie = routeur.recv(65535)
+for liste in sortie.splitlines():
+        print (liste)
+```
+On teste maintenant le script python pour savoir si le package paramiko fonctionne afin d'afficher "show ip interfaces brief" :
+```bash
+student@d59593327458:~/python$ python3 paramikoPY.py 
+Rentrez l'adresse IP: 172.18.0.3
+Rentrez votre nom d'utilisateur: admin
+Password: 
+''
+'R1>'
+'show ip int brief'
+'Interface                  IP-Address      OK? Method Status                Protocol'
+'FastEthernet0/0            172.18.0.3      YES manual up                    up      '
+'Serial0/0                  unassigned      YES unset  administratively down down    '
+'FastEthernet0/1            unassigned      YES unset  administratively down down    '
+'Serial0/1                  unassigned      YES unset  administratively down down    '
+'Serial0/2                  unassigned      YES unset  administratively down down    '
+'Serial0/3                  unassigned      YES unset  administratively down down    '
+'Serial1/0                  unassigned      YES unset  administratively down down    '
+'Serial1/1                  unassigned      YES unset  administratively down down    '
+'Serial1/2                  unassigned      YES unset  administratively down down    '
+'Serial1/3                  unassigned      YES unset  administratively down down    '
+'R1>'
+```
+##### 2. Généralisez votre script afin qu’il se connecte à plusieurs routeurs
+
+On modifie le script pour  permettre de le généralisez sur plusieurs routeurs :
+```python
+import paramiko
+import time
+import datetime
+import re
+from getpass import getpass
+
+nbrouteurs = input("Rentre le nombre de routeurs: ")
+for x in range(int(nbrouteurs)):
+	ip = input("Rentrez l'adresse IP: ")
+	username = input("Rentrez votre nom d'utilisateur: ")
+	password = getpass()
+
+	term_routeur=paramiko.SSHClient()
+	term_routeur.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+	term_routeur.connect(ip, port=22, username=username,
+                        password=password,
+                        look_for_keys=False, allow_agent=False)
+
+	routeur = term_routeur.invoke_shell()
+	sortie = routeur.recv(65535)
+	for liste in sortie.splitlines():
+		print (liste)
+
+	routeur.send("show ip int brief\n")
+	time.sleep(.5)
+	sortie = routeur.recv(65535)
+	for liste in sortie.splitlines():
+        	print (liste)
+	i = i + 1
+```
+
+On test notre script sur les différents routeurs :
+
+```bash
+student@d59593327458:~/python$ python3 paramikoPY_plusieurs.py 
+Rentre le nombre de routeurs: 2
+Rentrez l'adresse IP: 172.18.0.3
+Rentrez votre nom d'utilisateur: admin
+Password: 
+''
+'R1>'
+'show ip int brief'
+'Interface                  IP-Address      OK? Method Status                Protocol'
+'FastEthernet0/0            172.18.0.3      YES manual up                    up      '
+'Serial0/0                  unassigned      YES unset  administratively down down    '
+'FastEthernet0/1            unassigned      YES unset  administratively down down    '
+'Serial0/1                  unassigned      YES unset  administratively down down    '
+'Serial0/2                  unassigned      YES unset  administratively down down    '
+'Serial0/3                  unassigned      YES unset  administratively down down    '
+'Serial1/0                  unassigned      YES unset  administratively down down    '
+'Serial1/1                  unassigned      YES unset  administratively down down    '
+'Serial1/2                  unassigned      YES unset  administratively down down    '
+'Serial1/3                  unassigned      YES unset  administratively down down    '
+'R1>'
+Rentrez l'adresse IP: 172.18.0.3
+Rentrez votre nom d'utilisateur: admin
+Password: 
+''
+'R1>'
+'show ip int brief'
+'Interface                  IP-Address      OK? Method Status                Protocol'
+'FastEthernet0/0            172.18.0.3      YES manual up                    up      '
+'Serial0/0                  unassigned      YES unset  administratively down down    '
+'FastEthernet0/1            unassigned      YES unset  administratively down down    '
+'Serial0/1                  unassigned      YES unset  administratively down down    '
+'Serial0/2                  unassigned      YES unset  administratively down down    '
+'Serial0/3                  unassigned      YES unset  administratively down down    '
+'Serial1/0                  unassigned      YES unset  administratively down down    '
+'Serial1/1                  unassigned      YES unset  administratively down down    '
+'Serial1/2                  unassigned      YES unset  administratively down down    '
+'Serial1/3                  unassigned      YES unset  administratively down down    '
+'R1>'
+```
+#### 7.4 Utilisation du package netmiko pour gérer un équipement réseau
+
+##### 1. Afficher le résultat de la commande "show ip interface brief" sur mon routeur
+####
+Voici notre script :
+```python
+from netmiko import ConnectHandler
+connexion_netmiko = ConnectHandler(device_type='cisco_ios', host='172.18.0.3', username='admin', password='cisco')
+connexion_netmiko.find_prompt()
+sortie = connexion_netmiko.send_command("show ip int brief")
+print(sortie)
+```
+
+Voici le résultat donné par l'éxecution de notre script :
+
+```bash
+student@d59593327458:~/python$ python3 netmikoPY.py 
+Interface                  IP-Address      OK? Method Status                Protocol
+FastEthernet0/0            172.18.0.3      YES manual up                    up      
+Serial0/0                  unassigned      YES unset  administratively down down    
+FastEthernet0/1            unassigned      YES unset  administratively down down    
+Serial0/1                  unassigned      YES unset  administratively down down    
+Serial0/2                  unassigned      YES unset  administratively down down    
+Serial0/3                  unassigned      YES unset  administratively down down    
+Serial1/0                  unassigned      YES unset  administratively down down    
+Serial1/1                  unassigned      YES unset  administratively down down    
+Serial1/2                  unassigned      YES unset  administratively down down    
+Serial1/3                  unassigned      YES unset  administratively down down   
+```
+
+##### 2. Utilisation du package Netmiko pour configurer un autre réseau sur une interface de loopback pour le routeur Cisco.
+
+
+
 
 
 
